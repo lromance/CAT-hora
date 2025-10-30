@@ -1,18 +1,32 @@
 import { GoogleGenAI } from "@google/genai";
 import { timeToCatalan } from "../utils/timeToCatalan.ts";
 
-const API_KEY = process.env.API_KEY;
+// Aquesta funció obté la clau de l'API de manera segura sense trencar el navegador.
+const getApiKey = (): string | undefined => {
+  try {
+    // Comprovem si 'process' i 'process.env' existeixen abans d'intentar accedir-hi.
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      return process.env.API_KEY;
+    }
+  } catch (e) {
+    console.warn("No s'ha pogut accedir a process.env.API_KEY en aquest entorn.");
+  }
+  return undefined;
+};
 
-if (!API_KEY) {
-  // In a real app, you'd handle this more gracefully.
-  // For this context, we assume the key is available.
-  console.warn("API_KEY for Gemini is not set in environment variables.");
+const API_KEY = getApiKey();
+let ai: GoogleGenAI | null = null;
+
+// Inicialitzem l'IA només si tenim una clau. Això evita errors en carregar la pàgina.
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+} else {
+  console.warn("La clau de l'API de Gemini no està configurada. Les funcions d'IA estaran desactivades.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
-
 export const getGeminiExplanation = async (hour: number, minute: number): Promise<string> => {
-  if (!API_KEY) {
+  // Comprovem la clau aquí, just abans de fer la trucada.
+  if (!ai) {
     return "La clau de l'API de Gemini no està configurada. No es pot obtenir una explicació.";
   }
 
