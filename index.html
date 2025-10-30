@@ -23,10 +23,13 @@
   }
 }
 </script>
+<!-- Afegim Babel per traduir TSX a JS al navegador -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <!-- Canviem el tipus d'script perquè Babel l' processi -->
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
   </body>
 </html>

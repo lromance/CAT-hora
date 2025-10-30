@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import AnalogClock from './AnalogClock';
-import { timeToCatalan, formatTwoDigits } from '../utils/timeToCatalan';
+import AnalogClock from './AnalogClock.tsx';
+import { timeToCatalan, formatTwoDigits } from '../utils/timeToCatalan.ts';
 
 const LearnView: React.FC = () => {
   const [date, setDate] = useState(new Date());

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { QuizQuestion, ExerciseType, Time } from '../types';
-import { timeToCatalan } from '../utils/timeToCatalan';
+import { QuizQuestion, ExerciseType, Time } from '../types.ts';
+import { timeToCatalan } from '../utils/timeToCatalan.ts';
 
 // Function to get a random minute that aligns with the 'quarts' system for cleaner questions
 const getRandomMinute = (): number => {

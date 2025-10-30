@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
-import Header from './components/Header';
-import LearnView from './components/LearnView';
-import PracticeView from './components/PracticeView';
-import { View } from './types';
-import ExplainView from './components/ExplainView';
+import Header from './components/Header.tsx';
+import LearnView from './components/LearnView.tsx';
+import PracticeView from './components/PracticeView.tsx';
+import { View } from './types.ts';
+import ExplainView from './components/ExplainView.tsx';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Explain);

@@ -1,6 +1,5 @@
-
 import { GoogleGenAI } from "@google/genai";
-import { timeToCatalan } from "../utils/timeToCatalan";
+import { timeToCatalan } from "../utils/timeToCatalan.ts";
 
 const API_KEY = process.env.API_KEY;
 

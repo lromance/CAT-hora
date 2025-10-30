@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import AnalogClock from './AnalogClock';
-import { formatTwoDigits } from '../utils/timeToCatalan';
-import { translations } from '../translations/translations';
+import AnalogClock from './AnalogClock.tsx';
+import { formatTwoDigits } from '../utils/timeToCatalan.ts';
+import { translations } from '../translations/translations.ts';
 
 interface ExampleRowProps {
   hour: number;

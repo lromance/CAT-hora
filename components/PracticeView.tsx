@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useTimeGenerator } from '../hooks/useTimeGenerator';
-import { ExerciseType, Time } from '../types';
-import AnalogClock from './AnalogClock';
-import { getGeminiExplanation } from '../services/geminiService';
-import { timeToCatalan } from '../utils/timeToCatalan';
+import { useTimeGenerator } from '../hooks/useTimeGenerator.ts';
+import { ExerciseType, Time } from '../types.ts';
+import AnalogClock from './AnalogClock.tsx';
+import { getGeminiExplanation } from '../services/geminiService.ts';
+import { timeToCatalan } from '../utils/timeToCatalan.ts';
 
 const PracticeView: React.FC = () => {
   const { question, generateNewQuestion } = useTimeGenerator();
