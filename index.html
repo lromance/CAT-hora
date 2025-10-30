@@ -29,8 +29,26 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!-- El tipus 'text/babel' indica a Babel que ha de processar aquest script -->
-    <!-- data-type="module" és CRUCIAL perquè Babel mantingui els 'imports' -->
-    <script type="text/babel" data-presets="react,typescript" data-type="module" src="./index.tsx"></script>
+    <!--
+      El codi d'inici de React s'ha mogut aquí directament per assegurar una càrrega més robusta a entorns sense compilador com GitHub Pages.
+      Això evita problemes en carregar l'script extern 'index.tsx'.
+    -->
+    <script type="text/babel" data-presets="react,typescript" data-type="module">
+      import React from 'react';
+      import ReactDOM from 'react-dom/client';
+      import App from './App.tsx';
+
+      const rootElement = document.getElementById('root');
+      if (!rootElement) {
+        throw new Error("Could not find root element to mount to");
+      }
+
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+    </script>
   </body>
 </html>
