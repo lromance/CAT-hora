@@ -30,6 +30,7 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!-- El tipus 'text/babel' indica a Babel que ha de processar aquest script -->
-    <script type="text/babel" data-presets="react,typescript" src="./index.tsx"></script>
+    <!-- data-type="module" és CRUCIAL perquè Babel mantingui els 'imports' -->
+    <script type="text/babel" data-presets="react,typescript" data-type="module" src="./index.tsx"></script>
   </body>
 </html>
