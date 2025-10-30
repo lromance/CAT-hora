@@ -29,7 +29,7 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!-- Canviem el tipus d'script perquè Babel l' processi -->
-    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+    <!-- Canviem el tipus d'script perquè Babel l' processi i afegim presets explícits -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
   </body>
 </html>
