@@ -633,14 +633,14 @@
           section2Intro: "یہی کلید ہے! منٹ 15 سے، ہم अगले گھنٹے کے بارے में بات کرنا شروع کرتے ہیں۔ ہم گھنٹے کو چار 15 منٹ کی چوتھائیوں میں تقسیم کرتے ہیں۔",
           section2Intro_ca: "Aquesta és la clau! A partir del minut 15, comencem a parlar de l'hora següent. Dividim l'hora en quatre quarts de 15 minuts.",
           descQuarts1: "دو بج کر 15 منٹ ہو چکے ہیں، اس لیے تین بجنے میں ایک چوتھائی باقی ہے۔",
-          descQuarts1_ca: "Han passat 15 minuts de les dues, així que falta un quart per arribar a les tres.",
+          descQuarts1_ca: "Han passat 15 minuts de les dues, així que falta un quart per arribar a las tres.",
           descQuarts2: "30 منٹ (دو چوتھائیاں) گزر چکے ہیں، اس لیے یہ تین کی دو چوتھائیاں ہیں۔",
           descQuarts2_ca: "Han passat 30 minuts (dos quarts), per tant, són dos quarts de tres.",
           descQuarts3: "45 منٹ (تین چوتھائیاں) گزر چکے ہیں، اور ہم تین بجے کے قریب پہنچ رہے ہیں۔",
           descQuarts3_ca: "Han passat 45 minuts (tres quarts), i estem apropant-nos a les tres.",
           section3Title: "۳. اور پانچ، اور دس...",
           section3Title_ca: "3. I Cinc, I Deu...",
-          section3Intro: "ہم ابھی دیکھی گئی چوتھائیوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ اگلے گھنٹے کا حوالہ دیتے ہوئے۔",
+          section3Intro: "ہم ابھی دیکھی گئی چوتھائیوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ अगले گھنٹے کا حوالہ دیتے ہوئے۔",
           section3Intro_ca: "Podem afegir minuts (normalment de 5 en 5) als quarts que acabem de veure, sempre fent referència a l'hora següent.",
           descMinuts1: "یہ 8:15 (un quart de nou) ہے اور ہم مزید پانچ منٹ شامل کرتے ہیں۔",
           descMinuts1_ca: "Són les 8 i 15 (un quart de nou) i hi afegim cinc minuts més.",
@@ -1069,11 +1069,6 @@
 
         const hour = date.getHours();
         const minute = date.getMinutes();
-
-        useEffect(() => {
-          const timerId = setInterval(() => setDate(new Date()), 1000);
-          return () => clearInterval(timerId);
-        }, []);
 
         const handleHourChange = (e) => {
           const newDate = new Date(date);
