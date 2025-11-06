@@ -95,19 +95,20 @@
         // "Falten" logic for minutes 8-14 past any quarter.
         if (remainder > 7) {
             const minutesToNext = 15 - remainder;
+            const verbFalta = minutesToNext === 1 ? 'Falta' : 'Falten';
             const minutesToNextText = `${numberToCatalan(minutesToNext)} ${minutesToNext === 1 ? 'minut' : 'minuts'}`;
             const nextHourPhrase = nextH12 === 1 ? "d'una" : `de ${nextHText}`;
             
             switch (quarters) {
                 case 0: // Approaching one quarter (e.g., 8-14 mins)
-                    return `Falten ${minutesToNextText} per a un quart ${nextHourPhrase}.`;
+                    return `${verbFalta} ${minutesToNextText} per a un quart ${nextHourPhrase}.`;
                 case 1: // Approaching two quarters (e.g., 23-29 mins)
-                    return `Falten ${minutesToNextText} per a dos quarts ${nextHourPhrase}.`;
+                    return `${verbFalta} ${minutesToNextText} per a dos quarts ${nextHourPhrase}.`;
                 case 2: // Approaching three quarters (e.g., 38-44 mins)
-                    return `Falten ${minutesToNextText} per a tres quarts ${nextHourPhrase}.`;
+                    return `${verbFalta} ${minutesToNextText} per a tres quarts ${nextHourPhrase}.`;
                 case 3: // Approaching next hour (e.g., 53-59 mins)
                     const article = nextH12 === 1 ? 'a la' : 'a les';
-                    return `Falten ${minutesToNextText} per ${article} ${nextHText}.`;
+                    return `${verbFalta} ${minutesToNextText} per ${article} ${nextHText}.`;
             }
         }
 
@@ -757,7 +758,7 @@
           descQuarts3_ca: "Han passat 45 minuts (tres quarts), i estem apropant-nos a les tres.",
           section3Title: "۳. اور پانچ، اور دس...",
           section3Title_ca: "3. I Cinc, I Deu...",
-          section3Intro: "ہم ابھی دیکھی گئی چوتھائیوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ अगले گھنٹے کا حوالہ دیتے ہوئے۔",
+          section3Intro: "ہم ابھی دیکھی گئی چوتھائیوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ अगले گھنٹے کا حوالہ देते ہوئے۔",
           section3Intro_ca: "Podem afegir minuts (normalment de 5 en 5) als quarts que acabem de veure, sempre fent referència a l'hora següent.",
           descMinuts1: "یہ 8:15 (un quart de nou) ہے اور ہم مزید پانچ منٹ شامل کرتے ہیں۔",
           descMinuts1_ca: "Són les 8 i 15 (un quart de nou) i hi afegim cinc minuts més.",
