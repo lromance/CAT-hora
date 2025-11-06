@@ -73,7 +73,7 @@
 
       const timeToCatalan = (hour, minute) => {
         if (minute < 0 || minute > 59) minute = 0;
-        
+
         const h12 = hour % 12 === 0 ? 12 : hour % 12;
         const nextH12 = (hour + 1) % 12 === 0 ? 12 : (hour + 1) % 12;
 
@@ -81,8 +81,8 @@
         const nextHText = numberToCatalan(nextH12, true);
 
         if (minute === 0) {
-          if (hour === 0) return "És mitjanit.";
-          if (hour === 12) return "És migdia.";
+            if (hour === 0) return "És mitjanit.";
+            if (hour === 12) return "És migdia.";
         }
         
         let verb = h12 === 1 ? "És la" : "Són les";
@@ -92,33 +92,50 @@
         const quarters = Math.floor(minute / 15);
         const remainder = minute % 15;
 
-        const nextHourArticle = nextH12 === 1 ? 'de la' : 'de les';
-        verb = nextH12 === 1 ? "És" : "Són";
+        // "Falten" logic for minutes 8-14 past any quarter.
+        if (remainder > 7) {
+            const minutesToNext = 15 - remainder;
+            const minutesToNextText = `${numberToCatalan(minutesToNext)} ${minutesToNext === 1 ? 'minut' : 'minuts'}`;
+            const nextHourPhrase = nextH12 === 1 ? "d'una" : `de ${nextHText}`;
+            
+            switch (quarters) {
+                case 0: // Approaching one quarter (e.g., 8-14 mins)
+                    return `Falten ${minutesToNextText} per a un quart ${nextHourPhrase}.`;
+                case 1: // Approaching two quarters (e.g., 23-29 mins)
+                    return `Falten ${minutesToNextText} per a dos quarts ${nextHourPhrase}.`;
+                case 2: // Approaching three quarters (e.g., 38-44 mins)
+                    return `Falten ${minutesToNextText} per a tres quarts ${nextHourPhrase}.`;
+                case 3: // Approaching next hour (e.g., 53-59 mins)
+                    const article = nextH12 === 1 ? 'a la' : 'a les';
+                    return `Falten ${minutesToNextText} per ${article} ${nextHText}.`;
+            }
+        }
 
-        let mainPart = '';
-
-        switch (quarters) {
-          case 0: // 0-14
-            verb = h12 === 1 ? "És la" : "Són les";
+        // "I" logic for minutes 1-7 past any quarter, or minutes 1-14 for the first block.
+        if (quarters === 0) { // Handles minutes 1-7
             return `${verb} ${hText} i ${minute === 5 ? 'cinc' : minute === 10 ? 'deu' : `${minute} minuts`}.`;
-          case 1: // 15-29
-            mainPart = 'un quart';
-            break;
-          case 2: // 30-44
-            mainPart = 'dos quarts';
-            break;
-          case 3: // 45-59
-            mainPart = 'tres quarts';
-            break;
+        }
+
+        // Logic for exact quarters or minutes 1-7 past a quarter
+        let mainPart = '';
+        let finalVerb = '';
+        switch (quarters) {
+            case 1: mainPart = 'un quart'; finalVerb = 'És'; break;
+            case 2: mainPart = 'dos quarts'; finalVerb = 'Són'; break;
+            case 3: mainPart = 'tres quarts'; finalVerb = 'Són'; break;
         }
         
-        if (remainder === 0) {
-          return `${verb} ${mainPart} ${nextHourArticle} ${nextHText}.`;
-        }
+        const nextHourPhrase = nextH12 === 1 ? "d'una" : `de ${nextHText}`;
 
-        const remainderText = remainder === 5 ? 'cinc' : remainder === 10 ? 'deu' : `${remainder} minuts`;
-        return `${verb} ${mainPart} i ${remainderText} ${nextHourArticle} ${nextHText}.`;
+        if (remainder === 0) {
+            return `${finalVerb} ${mainPart} ${nextHourPhrase}.`;
+        }
+        
+        // Handles remainder 1-7 for quarters 1, 2, 3
+        const remainderText = remainder === 5 ? 'cinc' : `${remainder} minuts`;
+        return `${finalVerb} ${mainPart} i ${remainderText} ${nextHourPhrase}.`;
       };
+
 
       const formatTwoDigits = (num) => num.toString().padStart(2, '0');
 
@@ -158,16 +175,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "Son las 8 y 45 (tres quarts de nou) y sumamos diez minutos más.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. Los Primeros Minutos (Hasta el Cuarto)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "Antes de llegar al primer cuarto (del minuto 1 al 14), el sistema es más sencillo y se refiere a la hora actual.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. Acercándose al Cuarto",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "Cuando han pasado más de medio cuarto (unos 8 minutos), es habitual decir cuántos minutos *faltan* para llegar al *siguiente* cuarto. ¡Es como redondear hacia arriba!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "Son las 4 y 12, así que faltan 3 minutos para llegar a un cuarto de cinco.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "Son las 4 y 27 (dos cuartos menos 3 minutos), por lo tanto faltan 3 minutos para dos cuartos de cinco.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "Son las 4 y 55, así que faltan 5 minutos para las cinco.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. Los Primeros Minutos (Hasta el Cuarto)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "Antes de llegar al primer cuarto (del minuto 1 al 14), el sistema es más sencillo y se refiere a la hora actual.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Aquí simplemente añadimos los minutos a la hora que ya es.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Casos Especiales",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Finalmente, el mediodía y la medianoche tienen nombres propios.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Casos Especiales",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Finalmente, el mediodía y la medianoche tienen nombres propios.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "Las 12:00 de la mañana.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "Las 00:00 de la noche.",
@@ -207,16 +234,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "It's 8:45 (tres quarts de nou) and we add ten more minutes.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. The First Minutes (Up to the Quarter)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "Before reaching the first quarter (from minute 1 to 14), the system is simpler and refers to the current hour.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. Approaching the Quarter",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "When more than half a quarter (about 8 minutes) has passed, it's common to say how many minutes are *left* to reach the *next* quarter. It's like rounding up!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "It's 12 minutes past 4, so there are 3 minutes left to reach a quarter past five.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "It's 27 minutes past 4 (2 quarters - 3 minutes), so 3 minutes are left to reach two quarters of five.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "It's 55 minutes past 4, so there are 5 minutes left until five o'clock.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. The First Minutes (Up to the Quarter)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "Before reaching the first quarter (from minute 1 to 14), the system is simpler and refers to the current hour.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Here we simply add the minutes to the current hour.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Special Cases",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Finally, noon and midnight have their own names.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Special Cases",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Finally, noon and midnight have their own names.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "12:00 in the morning.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "00:00 at night.",
@@ -256,16 +293,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "Il est 8h45 (tres quarts de nou) et on ajoute dix minutes de plus.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. Les Premières Minutes (Jusqu'au Quart)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "Avant d'arriver au premier quart (de la minute 1 à 14), le système est plus simple et se réfère à l'heure actuelle.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. S'approcher du Quart",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "Quand plus de la moitié d'un quart d'heure est passée (environ 8 minutes), il est courant de dire combien de minutes il *manque* pour atteindre le quart d'heure *suivant*. C'est comme arrondir à l'supérieur !",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "Il est 4h12, il manque donc 3 minutes pour arriver à cinq heures et quart.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "Il est 4h27 (deux quarts moins 3 minutes), il manque donc 3 minutes pour deux quarts de cinq.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "Il est 4h55, il manque donc 5 minutes avant cinq heures.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. Les Premières Minutes (Jusqu'au Quart)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "Avant d'arriver au premier quart (de la minute 1 à 14), le système est plus simple et se réfère à l'heure actuelle.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Ici, on ajoute simplement les minutes à l'heure qu'il est déjà.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Cas Spéciaux",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Enfin, midi et minuit ont leurs propres noms.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Cas Spéciaux",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Enfin, midi et minuit ont leurs propres noms.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "12h00 du matin.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "00h00 de la nuit.",
@@ -305,16 +352,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "Ժամը 8:45 է (tres quarts de nou) և մենք ավելացնում ենք ևս տասը րոպե։",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. Առաջին րոպեները (մինչև քառորդը)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "Նախքան առաջին քառորդին հասնելը (1-ից 14-րդ րոպե), համակարգը ավելի պարզ է և վերաբերում է ընթացիկ ժամին։",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. Մոտենալով Քառորդին",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "Երբ քառորդի կեսից ավելին է անցել (մոտ 8 րոպե), ընդունված է ասել, թե քանի րոպե է *պակասում* մինչև *հաջորդ* քառորդը։ Դա նման է վերև կլորացնելուն։",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "Ժամը 4:12 է, այսինքն՝ 3 րոպե պակաս է մինչև հինգն անց քառորդ։",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "Ժամը 4:27 է (երկու քառորդից պակաս 3 րոպե), ուստի 3 րոպե պակաս է մինչև հինգի երկու քառորդը։",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "Ժամը 4:55 է, այսինքն՝ 5 րոպե պակաս է մինչև ժամը հինգը։",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. Առաջին րոպեները (մինչև քառորդը)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "Նախքան առաջին քառորդին հասնելը (1-ից 14-րդ րոպե), համակարգը ավելի պարզ է և վերաբերում է ընթացիկ ժամին։",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Այստեղ մենք պարզապես ավելացնում ենք րոպեները այն ժամին, որն արդեն կա։",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Հատուկ դեպքեր",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Վերջապես, կեսօրը և կեսգիշերը ունեն իրենց սեփական անունները։",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Հատուկ դեպքեր",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Վերջապես, կեսօրը և կեսգիշերը ունեն իրենց սեփական անունները։",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "Առավոտյան 12:00-ն։",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "Գիշերվա 00:00-ն։",
@@ -354,16 +411,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "现在是8点45分（tres quarts de nou），我们再加十分钟。",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. 最初的几分钟（直到一刻钟）",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "在到达第一个刻钟之前（从第1分钟到第14分钟），系统更简单，指的是当前的小时。",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. 接近刻钟",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "当一个刻钟过去一半以上（大约8分钟）时，通常会说*差*多少分钟到*下一个*刻钟。就像四舍五入一样！",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "现在是4点12分，所以还差3分钟到五点一刻。",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "现在是4点27分（两刻钟差3分钟），所以还差3分钟到五点的两刻钟。",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "现在是4点55分，所以还差5分钟到五点。",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. 最初的几分钟（直到一刻钟）",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "在到达第一个刻钟之前（从第1分钟到第14分钟），系统更简单，指的是当前的小时。",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "在这里，我们只是将分钟数加到当前的小时上。",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. 特殊情况",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "最后，中午和午夜有它们自己的名称。",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. 特殊情况",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "最后，中午和午夜有它们自己的名称。",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "早上12:00。",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "晚上00:00。",
@@ -403,16 +470,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "8:45 საათია (tres quarts de nou) და ჩვენ ვამატებთ კიდევ ათ წუთს.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. პირველი წუთები (მეოთხედამდე)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "პირველ მეოთხედამდე (1-დან 14 წუთამდე), სისტემა უფრო მარტივია და ეხება მიმდინარე საათს.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. მეოთხედთან მიახლოება",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "როდესაც მეოთხედის ნახევარზე მეტი გავიდა (დაახლოებით 8 წუთი), მიღებულია იმის თქმა, თუ რამდენი წუთი *აკლია* *შემდეგ* მეოთხედამდე. ეს ზემოთ დამრგვალებას ჰგავს!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "4:12 საათია, ასე რომ 3 წუთი აკლია ხუთის მეოთხედამდე.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "4:27 საათია (ორ მეოთხედს მინუს 3 წუთი), ასე რომ 3 წუთი აკლია ხუთის ორ მეოთხედამდე.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "4:55 საათია, ასე რომ 5 წუთი აკლია ხუთ საათამდე.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. პირველი წუთები (მეოთხედამდე)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "პირველ მეოთხედამდე (1-დან 14 წუთამდე), სისტემა უფრო მარტივია და ეხება მიმდინარე საათს.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "აქ ჩვენ უბრალოდ ვამატებთ წუთებს მიმდინარე საათს.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. განსაკუთრებული შემთხვევები",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "საბოლოოდ, შუადღეს და შუაღამეს თავიანთი სახელები აქვთ.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. განსაკუთრებული შემთხვევები",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "საბოლოოდ, შუადღეს და შუაღამეს თავიანთი სახელები აქვთ.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "დილის 12:00 საათი.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "ღამის 00:00 საათი.",
@@ -427,7 +504,7 @@
           section1Title: "1. पूरे बजे",
           section1Title_ca: "1. Les Hores en Punt",
           section1Intro: "पूरे घंटे के लिए, हम 'en punt' का उपयोग करते हैं। सावधान! एक बजे के लिए, हम एकवचन में 'És la una' कहते हैं। बाकी के लिए, 'Són les...'।",
-          section1Intro_ca: "Per a l'hora exacta, fem servir 'en punt'. Compte! Per a la una, diem 'És la una', en singular. Per a la resta, 'Són les...'.",
+          section1Intro_ca: "Per a l'hora exacta, fem servir 'en punt'. Compte! Per a la una, diem 'És la una', in singular. Per a la resta, 'Són les...'.",
           descEnPunt1: "हम एक बजे को छोड़कर किसी भी घंटे के लिए 'Són les' का उपयोग करते हैं।",
           descEnPunt1_ca: "Fem servir 'Són les' per a qualsevol hora que no sigui la una.",
           descEnPunt2: "एक बजे विशेष है और हमेशा 'És la' के साथ एकवचन में आता है।",
@@ -452,16 +529,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "यह 8:45 (tres quarts de nou) है और हम दस और मिनट जोड़ते हैं।",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. पहले कुछ मिनट (चौथाई तक)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "पहली चौथाई तक पहुंचने से पहले (मिनट 1 से 14 तक), प्रणाली सरल है और वर्तमान घंटे को संदर्भित करती है।",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. चौथाई के करीब पहुंचना",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "जब आधी चौथाई (लगभग 8 मिनट) से अधिक समय बीत जाता है, तो यह कहना आम है कि *अगली* चौथाई तक पहुंचने में कितने मिनट *बाकी* हैं। यह ऊपर की ओर पूर्णांकित करने जैसा है!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "4 बजकर 12 मिनट हुए हैं, इसलिए पांच बजकर चौथाई होने में 3 मिनट बाकी हैं।",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "4 बजकर 27 मिनट हुए हैं (दो चौथाई में 3 मिनट कम), इसलिए पांच की दो चौथाई में 3 मिनट बाकी हैं।",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "4 बजकर 55 मिनट हुए हैं, इसलिए पांच बजने में 5 मिनट बाकी हैं।",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. पहले कुछ मिनट (चौथाई तक)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "पहली चौथाई तक पहुंचने से पहले (मिनट 1 से 14 तक), प्रणाली सरल है और वर्तमान घंटे को संदर्भित करती है।",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "यहाँ हम बस वर्तमान घंटे में मिनट जोड़ते हैं।",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. विशेष मामले",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "अंत में, दोपहर और आधी रात के अपने नाम हैं।",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. विशेष मामले",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "अंत में, दोपहर और आधी रात के अपने नाम हैं।",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "सुबह के 12:00 बजे।",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "रात के 00:00 बजे।",
@@ -501,16 +588,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "यो ८:४५ (tres quarts de nou) हो र हामी थप दश मिनेट थप्छौं।",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "४. पहिलो केही मिनेट (चौथाईसम्म)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "पहिलो चौथाईमा पुग्नु अघि (१ देखि १४ मिनेटसम्म), प्रणाली सरल छ र हालको घण्टालाई जनाउँछ।",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "४. चौथाईको नजिक",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "जब आधा चौथाई (लगभग ८ मिनेट) भन्दा बढी समय बित्छ, *अर्को* चौथाईमा पुग्न कति मिनेट *बाँकी* छ भन्नु सामान्य छ। यो माथि राउन्ड अफ गरे जस्तै हो!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "४ बजेर १२ मिनेट गयो, त्यसैले सवा पाँच बज्न ३ मिनेट बाँकी छ।",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "४ बजेर २७ मिनेट गयो (दुई चौथाईमा ३ मिनेट कम), त्यसैले पाँचको दुई चौथाई हुन ३ मिनेट बाँकी छ।",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "४ बजेर ५५ मिनेट गयो, त्यसैले पाँच बज्न ५ मिनेट बाँकी छ।",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "५. पहिलो केही मिनेट (चौथाईसम्म)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "पहिलो चौथाईमा पुग्नु अघि (१ देखि १४ मिनेटसम्म), प्रणाली सरल छ र हालको घण्टालाई जनाउँछ।",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "यहाँ हामी केवल हालको घण्टामा मिनेटहरू थप्छौं।",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "५. विशेष अवस्थाहरू",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "अन्तमा, मध्यान्ह र मध्यरातका आफ्नै नामहरू छन्।",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "६. विशेष अवस्थाहरू",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "अन्तमा, मध्यान्ह र मध्यरातका आफ्नै नामहरू छन्।",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "बिहानको १२:०० बजे।",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "रातको ००:०० बजे।",
@@ -550,16 +647,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "Сейчас 8:45 (tres quarts de nou), и мы добавляем еще десять минут.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. Первые минуты (до четверти)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "До первой четверти (с 1 по 14 минуту) система проще и относится к текущему часу.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. Приближаясь к четверти",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "Когда прошло больше половины четверти (около 8 минут), принято говорить, сколько минут *осталось* до *следующей* четверти. Это как округление в большую сторону!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "Сейчас 4:12, так что осталось 3 минуты до четверти пятого.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "Сейчас 4:27 (без 3 минут две четверти), так что осталось 3 минуты до двух четвертей пятого.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "Сейчас 4:55, так что осталось 5 минут до пяти.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. Первые минуты (до четверти)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "До первой четверти (с 1 по 14 минуту) система проще и относится к текущему часу.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Здесь мы просто добавляем минуты к текущему часу.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Особые случаи",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Наконец, полдень и полночь имеют свои собственные названия.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Особые случаи",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Наконец, полдень и полночь имеют свои собственные названия.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "12:00 утра.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "00:00 ночи.",
@@ -599,16 +706,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "Зараз 8:45 (tres quarts de nou), і ми додаємо ще десять хвилин.",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "4. Перші хвилини (до чверті)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "До першої чверті (з 1 до 14 хвилини) система простіша і стосується поточної години.",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "4. Наближаючись до чверті",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "Коли минуло більше половини чверті (близько 8 хвилин), прийнято говорити, скільки хвилин *залишилося* до *наступної* чверті. Це як заокруглення вгору!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "Зараз 4:12, отже, залишилося 3 хвилини до чверті на п'яту.",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "Зараз 4:27 (без 3 хвилин дві чверті), отже, залишилося 3 хвилини до двох чвертей на п'яту.",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "Зараз 4:55, отже, залишилося 5 хвилин до п'ятої.",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "5. Перші хвилини (до чверті)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "До першої чверті (з 1 до 14 хвилини) система простіша і стосується поточної години.",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "Тут ми просто додаємо хвилини до поточної години.",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "5. Особливі випадки",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "Нарешті, полудень і північ мають свої власні назви.",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "6. Особливі випадки",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "Нарешті, полудень і північ мають свої власні назви.",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "12:00 ранку.",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "00:00 ночі.",
@@ -618,11 +735,11 @@
           mainTitle: "کاتالان میں وقت کیسے بتایا جاتا ہے؟",
           mainTitle_ca: "Com es diu l'hora en català?",
           selectLanguage_ca: "ترجمے کے لیے زبان منتخب کریں:",
-          intro: "کاتالان میں وقت بتانے کا ایک منفرد اور گہرا طریقہ ہے، جسے 'چوتھائی نظام' (sistema de quarts) کہا جاتا ہے۔ موجودہ گھنٹے کے گزرے ہوئے منٹوں کو گننے کے بجائے (جیسے 'ڈھائی بجے')، یہ اکثر آنے والے अगले گھنٹے کے حصے کا حوالہ دیتا ہے۔ آئیے اسے قدم بہ قدم دیکھتے ہیں!",
+          intro: "کاتالان میں وقت بتانے کا ایک منفرد اور گہرا طریقہ ہے, جسے 'چوتھائی نظام' (sistema de quarts) کہا جاتا ہے۔ موجودہ گھنٹے کے گزرے ہوئے منٹوں کو گننے کے بجائے (جیسے 'ڈھائی بجے')، यह अक्सर आने वाले अगले گھنٹے کے حصے کا حوالہ دیتا ہے۔ آئیے اسے قدم بہ قدم دیکھتے ہیں!",
           intro_ca: "El català té una manera particular i molt arrelada de dir l'hora, coneguda com el 'sistema de quarts'. En lloc de comptar els minuts passats de l'hora actual (com en 'dos i mitja'), sovint es fa referència a la fracció de l'hora següent que s'acosta. Anem a veure-ho pas a pas!",
           section1Title: "۱. پورے بجے",
           section1Title_ca: "1. Les Hores en Punt",
-          section1Intro: "پورے گھنٹے کے لیے، ہم 'en punt' استعمال کرتے ہیں۔ ہوشیار! ایک بجے کے لیے، ہم واحد میں 'És la una' کہتے ہیں۔ باقی کے لیے، 'Són les...'۔",
+          section1Intro: "پورے گھنٹے کے لیے، ہم 'en punt' استعمال کرتے ہیں۔ ہوشیار! ایک بجے کے لیے، ہم واحد میں 'És la una' कहते ہیں۔ باقی کے لیے، 'Són les...'۔",
           section1Intro_ca: "Per a l'hora exacta, fem servir 'en punt'. Compte! Per a la una, diem 'És la una', en singular. Per a la resta, 'Són les...'.",
           descEnPunt1: "ہم ایک بجے کے علاوہ کسی بھی گھنٹے کے لیے 'Són les' استعمال کرتے ہیں۔",
           descEnPunt1_ca: "Fem servir 'Són les' per a qualsevol hora que no sigui la una.",
@@ -630,7 +747,7 @@
           descEnPunt2_ca: "La una és especial i sempre va en singular amb 'És la'.",
           section2Title: "۲. چوتھائی نظام",
           section2Title_ca: "2. El Sistema de Quarts",
-          section2Intro: "یہی کلید ہے! منٹ 15 سے، ہم अगले گھنٹے کے بارے में بات کرنا شروع کرتے ہیں۔ ہم گھنٹے کو چار 15 منٹ کی چوتھائیوں میں تقسیم کرتے ہیں۔",
+          section2Intro: "یہی کلید ہے! منٹ 15 سے، ہم अगले گھنٹے کے بارے میں بات کرنا شروع کرتے ہیں۔ ہم گھنٹے کو چار 15 منٹ کی چوتھائیوں میں تقسیم کرتے ہیں۔",
           section2Intro_ca: "Aquesta és la clau! A partir del minut 15, comencem a parlar de l'hora següent. Dividim l'hora en quatre quarts de 15 minuts.",
           descQuarts1: "دو بج کر 15 منٹ ہو چکے ہیں، اس لیے تین بجنے میں ایک چوتھائی باقی ہے۔",
           descQuarts1_ca: "Han passat 15 minuts de les dues, així que falta un quart per arribar a las tres.",
@@ -648,16 +765,26 @@
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
           descMinuts3: "یہ 8:45 (tres quarts de nou) ہے اور ہم مزید دس منٹ شامل کرتے ہیں۔",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
-          section4Title: "۴. پہلے چند منٹ (چوتھائی تک)",
-          section4Title_ca: "4. Els Primers Minuts (Fins al Quart)",
-          section4Intro: "پہلی چوتھائی تک پہنچنے سے پہلے (منٹ 1 سے 14 تک)، نظام آسان ہے اور موجودہ گھنٹے کا حوالہ دیتا ہے۔",
-          section4Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
+          section4Title: "۴. چوتھائی کے قریب",
+          section4Title_ca: "4. Apropant-se al Quart",
+          section4Intro: "جب آدھی چوتھائی (تقریباً 8 منٹ) سے زیادہ وقت گزر جائے، تو یہ کہنا عام ہے کہ *اگلی* چوتھائی تک پہنچنے میں کتنے منٹ *باقی* ہیں۔ یہ اوپر کی طرف گول کرنے جیسا ہے!",
+          section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
+          descRounding1: "4 بج کر 12 منٹ ہوئے ہیں، اس لیے سوا پانچ بجنے میں 3 منٹ باقی ہیں۔",
+          descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
+          descRounding2: "4 بج کر 27 منٹ ہوئے ہیں (دو چوتھائی میں 3 منٹ کم)، اس لیے پانچ کی دو چوتھائیوں میں 3 منٹ باقی ہیں۔",
+          descRounding2_ca: "Són les 4 i 27 (dos quarts menys 3 minuts), per tant falten 3 minuts per a dos quarts de cinc.",
+          descRounding3: "4 بج کر 55 منٹ ہوئے ہیں، اس لیے پانچ بجنے میں 5 منٹ باقی ہیں۔",
+          descRounding3_ca: "Són les 4 i 55, així que falten 5 minuts per a les cinc.",
+          section5Title: "۵. پہلے چند منٹ (چوتھائی تک)",
+          section5Title_ca: "5. Els Primers Minuts (Fins al Quart)",
+          section5Intro: "پہلی چوتھائی تک پہنچنے سے پہلے (منٹ 1 से 14 تک)، نظام آسان ہے اور موجودہ گھنٹے کا حوالہ دیتا ہے۔",
+          section5Intro_ca: "Abans d'arribar al primer quart (del minut 1 al 14), el sistema és més senzill i es refereix a l'hora actual.",
           descPrimersMinuts: "یہاں ہم صرف موجودہ گھنٹے میں منٹ شامل کرتے ہیں۔",
           descPrimersMinuts_ca: "Aquí simplement afegim els minuts a l'hora que ja és.",
-          section5Title: "۵. خصوصی معاملات",
-          section5Title_ca: "5. Casos Especials",
-          section5Intro: "آخر میں، دوپہر اور آدھی رات کے اپنے نام ہیں۔",
-          section5Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
+          section6Title: "۶. خصوصی معاملات",
+          section6Title_ca: "6. Casos Especials",
+          section6Intro: "آخر میں، دوپہر اور آدھی رات کے اپنے نام ہیں۔",
+          section6Intro_ca: "Finalment, el migdia i la mitjanit tenen noms propis.",
           descEspecials1: "صبح کے 12:00 بجے۔",
           descEspecials1_ca: "Les 12:00 del matí.",
           descEspecials2: "رات کے 00:00 بجے۔",
@@ -697,7 +824,7 @@
         const prompt = `
           Ets un professor de català amable i expert en ensenyar a dir l'hora.
           Explica de manera senzilla i clara, en català, per què l'hora ${numericTime} es diu "${timeString}".
-          Enfoca't en el sistema de quarts.
+          Enfoca't en el sistema de quarts i en per què s'usa "falten X minuts" o "i X minuts" segons el cas.
           Fes una explicació breu, en un o dos paràgrafs curts.
           No utilitzis markdown, només text pla.
         `;
@@ -766,8 +893,7 @@
 
       // --- from hooks/useTimeGenerator.ts ---
       const getRandomMinute = () => {
-        const options = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-        return options[Math.floor(Math.random() * options.length)];
+        return Math.floor(Math.random() * 60);
       };
 
       const generateIncorrectOptions = (correctTime) => {
@@ -775,7 +901,7 @@
           const { hour, minute } = correctTime;
           
           options.push(timeToCatalan((hour + 1) % 24, minute));
-          options.push(timeToCatalan(hour, 60 - minute === 60 ? 0 : 60-minute));
+          options.push(timeToCatalan(hour, (60 - minute) % 60));
 
           if (minute === 15) {
               options.push(timeToCatalan(hour, 45));
@@ -1012,8 +1138,8 @@
                   translatedDescription={t.descMinuts2}
                 />
                 <ExampleRow 
-                  hour={8} minute={55} 
-                  text={<>Són <span className="text-indigo-600">tres quarts i deu</span> de <span className="text-rose-600">nou</span>.</>}
+                  hour={8} minute={50} 
+                  text={<>Són <span className="text-indigo-600">tres quarts i cinc</span> de <span className="text-rose-600">nou</span>.</>}
                   description={t.descMinuts3_ca}
                   translatedDescription={t.descMinuts3}
                 />
@@ -1027,6 +1153,35 @@
                   {t.section4Intro_ca}
                   <span className="block text-slate-500 italic mt-1">{t.section4Intro}</span>
               </p>
+              <div className="bg-slate-50 rounded-lg p-4 space-y-4">
+                <ExampleRow 
+                  hour={4} minute={12} 
+                  text={<>Falten <span className="text-teal-600">tres minuts</span> per a <span className="text-indigo-600">un quart</span> de <span className="text-rose-600">cinc</span>.</>}
+                  description={t.descRounding1_ca}
+                  translatedDescription={t.descRounding1}
+                />
+                <ExampleRow 
+                  hour={4} minute={27} 
+                  text={<>Falten <span className="text-teal-600">tres minuts</span> per a <span className="text-indigo-600">dos quarts</span> de <span className="text-rose-600">cinc</span>.</>}
+                  description={t.descRounding2_ca}
+                  translatedDescription={t.descRounding2}
+                />
+                <ExampleRow 
+                  hour={4} minute={55} 
+                  text={<>Falten <span className="text-teal-600">cinc minuts</span> per a les <span className="text-rose-600">cinc</span>.</>}
+                  description={t.descRounding3_ca}
+                  translatedDescription={t.descRounding3}
+                />
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-2xl font-bold text-slate-800 mb-4 pb-2 border-b-2 border-sky-200">{t.section5Title_ca}</h3>
+              <p className="text-slate-500 italic -mt-4 mb-4 text-xl">{t.section5Title}</p>
+              <p className="mb-4 text-slate-700">
+                  {t.section5Intro_ca}
+                  <span className="block text-slate-500 italic mt-1">{t.section5Intro}</span>
+              </p>
               <div className="bg-slate-50 rounded-lg p-4">
                 <ExampleRow 
                   hour={4} minute={10} 
@@ -1038,11 +1193,11 @@
             </section>
 
             <section>
-              <h3 className="text-2xl font-bold text-slate-800 mb-4 pb-2 border-b-2 border-sky-200">{t.section5Title_ca}</h3>
-              <p className="text-slate-500 italic -mt-4 mb-4 text-xl">{t.section5Title}</p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4 pb-2 border-b-2 border-sky-200">{t.section6Title_ca}</h3>
+              <p className="text-slate-500 italic -mt-4 mb-4 text-xl">{t.section6Title}</p>
               <p className="mb-4 text-slate-700">
-                  {t.section5Intro_ca}
-                  <span className="block text-slate-500 italic mt-1">{t.section5Intro}</span>
+                  {t.section6Intro_ca}
+                  <span className="block text-slate-500 italic mt-1">{t.section6Intro}</span>
               </p>
               <div className="bg-slate-50 rounded-lg p-4">
                 <ExampleRow 
@@ -1346,7 +1501,7 @@
                       >
                         Següent
                       </button>
-                      {feedback === 'incorrect' && !geminiExplanation && !isExplanationLoading && (
+                      {feedback === 'incorrect' && !geminiExplanation && !isExplanationLoading && API_KEY && (
                         <button onClick={fetchExplanation} className="text-sm text-sky-700 hover:underline font-semibold whitespace-nowrap">
                           Explica-m'ho
                         </button>
