@@ -17,8 +17,7 @@
 {
   "imports": {
     "react": "https://esm.sh/react@18.3.1",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "@google/genai": "https://esm.sh/@google/genai@^1.15.0"
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
   }
 }
 </script>
@@ -33,11 +32,15 @@
       Això elimina la necessitat de carregar fitxers externs de forma dinàmica, la qual cosa estava fallant.
     -->
     <script type="text/babel" data-presets="react,typescript" data-type="module">
-      import React, { useState, useEffect, useCallback } from 'react';
+      import React, { useState, useEffect, useCallback, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
-      import { GoogleGenAI } from "@google/genai";
 
       // ===== INICI DEL CODI CONSOLIDAT =====
+
+      // !!! CONFIGURACIÓ NECESSÀRIA !!!
+      // Segueix les instruccions del fitxer README.md per obtenir la teva URL
+      // i enganxa-la aquí, substituint 'URL_DEL_TEU_SCRIPT_AQUI'.
+      const GAS_URL = 'https://script.google.com/macros/s/AKfycbxlaTBVtq5jsddnonIe9Z6oWp4vxNNlnTWI0i9mdR0FWa2HWp_Lbbme0qHlEy1iS1Kh4A/exec';
 
       // --- from types.ts ---
       const View = {
@@ -573,7 +576,7 @@
           section2Title_ca: "2. El Sistema de Quarts",
           section2Intro: "यो नै मुख्य कुरा हो! १५ मिनेटपछि, हामी अर्को घण्टाको बारेमा कुरा गर्न थाल्छौं। हामी घण्टालाई चार १५-मिनेटको चौथाईमा विभाजन गर्छौं।",
           section2Intro_ca: "Aquesta és la clau! A partir del minut 15, comencem a parlar de l'hora següent. Dividim l'hora en quatre quarts de 15 minuts.",
-          descQuarts1: "दुई बजेर १५ मिनेट गयो, त्यसैले तीन बज्न एक चौथाई बाँकी छ।",
+          descQuarts1: "दुई बजेर ۱۵ मिनेट गयो, त्यसैले तीन बज्न एक चौथाई बाँकी छ।",
           descQuarts1_ca: "Han passat 15 minuts de les dues, així que falta un quart per arribar a les tres.",
           descQuarts2: "३० मिनेट (दुई चौथाई) बितिसक्यो, त्यसैले यो तीनको दुई चौथाई हो।",
           descQuarts2_ca: "Han passat 30 minuts (dos quarts), per tant, són dos quarts de tres.",
@@ -742,13 +745,13 @@
           section1Title_ca: "1. Les Hores en Punt",
           section1Intro: "پورے گھنٹے کے لیے، ہم 'en punt' استعمال کرتے ہیں۔ ہوشیار! ایک بجے کے لیے، ہم واحد میں 'És la una' कहते ہیں۔ باقی کے لیے، 'Són les...'۔",
           section1Intro_ca: "Per a l'hora exacta, fem servir 'en punt'. Compte! Per a la una, diem 'És la una', en singular. Per a la resta, 'Són les...'.",
-          descEnPunt1: "ہم ایک بجے کے علاوہ کسی بھی گھنٹے کے لیے 'Són les' استعمال کرتے ہیں۔",
+          descEnPunt1: "ہم ایک بجے کے علاوہ کسی بھی گھنٹے کے لیے 'Són les' استعمال करते ہیں۔",
           descEnPunt1_ca: "Fem servir 'Són les' per a qualsevol hora que no sigui la una.",
           descEnPunt2: "ایک بجے خاص ہے اور ہمیشہ 'És la' کے ساتھ واحد میں آتا ہے۔",
           descEnPunt2_ca: "La una és especial i sempre va en singular amb 'És la'.",
           section2Title: "۲. چوتھائی نظام",
           section2Title_ca: "2. El Sistema de Quarts",
-          section2Intro: "یہی کلید ہے! منٹ 15 سے، ہم अगले گھنٹے کے بارے میں بات کرنا شروع کرتے ہیں۔ ہم گھنٹے کو چار 15 منٹ کی چوتھائیوں میں تقسیم کرتے ہیں۔",
+          section2Intro: "یہی کلید ہے! منٹ 15 से، ہم अगले گھنٹے کے بارے में بات کرنا شروع کرتے ہیں۔ ہم گھنٹے کو چار 15 منٹ کی چوتھائیوں میں تقسیم کرتے ہیں۔",
           section2Intro_ca: "Aquesta és la clau! A partir del minut 15, comencem a parlar de l'hora següent. Dividim l'hora en quatre quarts de 15 minuts.",
           descQuarts1: "دو بج کر 15 منٹ ہو چکے ہیں، اس لیے تین بجنے میں ایک چوتھائی باقی ہے۔",
           descQuarts1_ca: "Han passat 15 minuts de les dues, així que falta un quart per arribar a las tres.",
@@ -758,17 +761,17 @@
           descQuarts3_ca: "Han passat 45 minuts (tres quarts), i estem apropant-nos a les tres.",
           section3Title: "۳. اور پانچ، اور دس...",
           section3Title_ca: "3. I Cinc, I Deu...",
-          section3Intro: "ہم ابھی دیکھی گئی چوتھائیوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ अगले گھنٹے کا حوالہ देते ہوئے۔",
+          section3Intro: "ہم ابھی دیکھی گئی چوتھائيوں میں منٹ شامل کر سکتے ہیں (عام طور پر 5 کے ضرب میں)، ہمیشہ अगले گھنٹے کا حوالہ देते ہوئے۔",
           section3Intro_ca: "Podem afegir minuts (normalment de 5 en 5) als quarts que acabem de veure, sempre fent referència a l'hora següent.",
           descMinuts1: "یہ 8:15 (un quart de nou) ہے اور ہم مزید پانچ منٹ شامل کرتے ہیں۔",
           descMinuts1_ca: "Són les 8 i 15 (un quart de nou) i hi afegim cinc minuts més.",
           descMinuts2: "یہ 8:30 (dos quarts de nou) ہے اور ہم دس منٹ شامل کرتے ہیں۔",
           descMinuts2_ca: "Són les 8 i 30 (dos quarts de nou) i hi afegim deu minuts.",
-          descMinuts3: "یہ 8:45 (tres quarts de nou) ہے اور ہم مزید دس منٹ شامل کرتے ہیں۔",
+          descMinuts3: "یہ 8:45 (tres quarts de nou) ہے اور ہم مزید دس منٹ شامل करते ہیں۔",
           descMinuts3_ca: "Són les 8 i 45 (tres quarts de nou) i hi sumem deu minuts més.",
           section4Title: "۴. چوتھائی کے قریب",
           section4Title_ca: "4. Apropant-se al Quart",
-          section4Intro: "جب آدھی چوتھائی (تقریباً 8 منٹ) سے زیادہ وقت گزر جائے، تو یہ کہنا عام ہے کہ *اگلی* چوتھائی تک پہنچنے میں کتنے منٹ *باقی* ہیں۔ یہ اوپر کی طرف گول کرنے جیسا ہے!",
+          section4Intro: "جب آدھی چوتھائی (تقریباً 8 منٹ) سے زیادہ وقت گزر جائے، تو यह کہنا عام ہے کہ *اگلی* چوتھائی تک پہنچنے میں کتنے منٹ *باقی* ہیں۔ یہ اوپر کی طرف گول کرنے جیسا ہے!",
           section4Intro_ca: "Quan ha passat més de mig quart (uns 8 minuts), és habitual dir quants minuts *falten* per arribar al *següent* quart. És com arrodonir cap amunt!",
           descRounding1: "4 بج کر 12 منٹ ہوئے ہیں، اس لیے سوا پانچ بجنے میں 3 منٹ باقی ہیں۔",
           descRounding1_ca: "Són les 4 i 12, així que falten 3 minuts per arribar a un quart de cinc.",
@@ -794,31 +797,46 @@
       };
       
       // --- from services/geminiService.ts ---
-      const getApiKey = () => {
-        try {
-          if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-            return process.env.API_KEY;
-          }
-        } catch (e) {
-          console.warn("No s'ha pogut accedir a process.env.API_KEY en aquest entorn.");
+      const callGasProxy = async (payload) => {
+        if (GAS_URL === 'URL_DEL_TEU_SCRIPT_AQUI' || !GAS_URL) {
+          const errorMessage = "La URL del proxy de Google Apps Script no està configurada. Si us plau, segueix les instruccions del fitxer README.md.";
+          console.error(errorMessage);
+          alert(errorMessage);
+          return { error: errorMessage };
         }
-        return undefined;
+        try {
+          // GAS requereix que el body sigui un string, no un objecte JSON directament amb 'application/json'
+          const response = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: {
+              // S'envia com a text pla perquè GAS ho processi amb doPost(e)
+              'Content-Type': 'text/plain;charset=utf-8', 
+            },
+            body: JSON.stringify(payload),
+            mode: 'cors', // Important per a peticions cross-origin des de GitHub Pages
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Error de xarxa: ${response.status} ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          // El nostre script de GAS pot retornar un error estructurat
+          if (result.error) {
+            console.error("Error retornat pel proxy de GAS:", result.details || result.error);
+            // Propaguem l'error perquè la UI pugui reaccionar
+            throw new Error(result.error);
+          }
+
+          return result;
+        } catch (error) {
+          console.error("Error en la comunicació amb el proxy de GAS:", error);
+          // Retornem un objecte d'error consistent per a la gestió a la UI
+          return { error: error.message };
+        }
       };
 
-      const API_KEY = getApiKey();
-      let ai = null;
-
-      if (API_KEY) {
-        ai = new GoogleGenAI({ apiKey: API_KEY });
-      } else {
-        console.warn("La clau de l'API de Gemini no està configurada. Les funcions d'IA estaran desactivades.");
-      }
-
       const getGeminiExplanation = async (hour, minute) => {
-        if (!ai) {
-          return "La clau de l'API de Gemini no està configurada. No es pot obtenir una explicació.";
-        }
-
         const timeString = timeToCatalan(hour, minute);
         const numericTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 
@@ -829,17 +847,14 @@
           Fes una explicació breu, en un o dos paràgrafs curts.
           No utilitzis markdown, només text pla.
         `;
+        
+        const contents = [{ parts: [{ text: prompt }] }];
+        const response = await callGasProxy({ action: 'explain', contents: contents });
 
-        try {
-          const response = await ai.models.generateContent({
-              model: 'gemini-2.5-flash',
-              contents: prompt,
-          });
-          return response.text;
-        } catch (error) {
-          console.error("Error calling Gemini API:", error);
-          return "Hi ha hagut un error en contactar amb l'assistent d'IA. Intenta-ho de nou més tard.";
+        if (response.error) {
+          return `Hi ha hagut un error en contactar amb l'assistent d'IA: ${response.error}`;
         }
+        return response.text;
       };
 
       // --- from components/AnalogClock.tsx ---
@@ -991,26 +1006,28 @@
                 </svg>
                 <h1 className="text-2xl font-bold text-slate-800">Rellotge Català</h1>
               </div>
-              <nav className="flex space-x-2 bg-slate-200 p-1 rounded-lg">
-                <div
-                  onClick={() => setCurrentView(View.Explain)}
-                  className={`${navItemClasses} ${currentView === View.Explain ? activeClasses : inactiveClasses}`}
-                >
-                  Dir l'hora
-                </div>
-                <div
-                  onClick={() => setCurrentView(View.Learn)}
-                  className={`${navItemClasses} ${currentView === View.Learn ? activeClasses : inactiveClasses}`}
-                >
-                  Aprèn
-                </div>
-                <div
-                  onClick={() => setCurrentView(View.Practice)}
-                  className={`${navItemClasses} ${currentView === View.Practice ? activeClasses : inactiveClasses}`}
-                >
-                  Practica
-                </div>
-              </nav>
+              <div className="flex items-center space-x-4">
+                <nav className="flex space-x-2 bg-slate-200 p-1 rounded-lg">
+                  <div
+                    onClick={() => setCurrentView(View.Explain)}
+                    className={`${navItemClasses} ${currentView === View.Explain ? activeClasses : inactiveClasses}`}
+                  >
+                    Dir l'hora
+                  </div>
+                  <div
+                    onClick={() => setCurrentView(View.Learn)}
+                    className={`${navItemClasses} ${currentView === View.Learn ? activeClasses : inactiveClasses}`}
+                  >
+                    Aprèn
+                  </div>
+                  <div
+                    onClick={() => setCurrentView(View.Practice)}
+                    className={`${navItemClasses} ${currentView === View.Practice ? activeClasses : inactiveClasses}`}
+                  >
+                    Practica
+                  </div>
+                </nav>
+              </div>
             </div>
           </header>
         );
@@ -1238,6 +1255,34 @@
           setDate(newDate);
         };
 
+        const handlePlayAudio = () => {
+          // Atura qualsevol reproducció anterior
+          window.speechSynthesis.cancel(); 
+          
+          const textToSpeak = timeToCatalan(hour, minute);
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          
+          // Busca una veu en català. La llista de veus es pot carregar de manera asíncrona.
+          const voices = window.speechSynthesis.getVoices();
+          const catalanVoice = voices.find(voice => voice.lang === 'ca-ES');
+          
+          if (catalanVoice) {
+            utterance.voice = catalanVoice;
+          } else {
+            console.warn("No s'ha trobat cap veu en català ('ca-ES'). S'utilitzarà la veu per defecte del navegador.");
+            // Opcionalment, podem assignar un idioma per defecte per millorar la pronunciació si no es troba català.
+            utterance.lang = 'ca-ES';
+          }
+          
+          window.speechSynthesis.speak(utterance);
+        };
+
+        const SpeakerIcon = () => (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        );
+
         return (
           <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg animate-fade-in">
             <h2 className="text-3xl font-bold text-sky-700 mb-2">Aprèn les Hores</h2>
@@ -1250,10 +1295,19 @@
                 </div>
               </div>
               <div className="space-y-6">
-                <div className="text-center p-6 bg-sky-100 border-l-4 border-sky-500 rounded-r-lg">
-                  <p className="text-2xl md:text-3xl font-bold text-sky-800">
-                    {timeToCatalan(hour, minute)}
-                  </p>
+                <div className="p-6 bg-sky-100 border-l-4 border-sky-500 rounded-r-lg">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-2xl md:text-3xl font-bold text-sky-800">
+                      {timeToCatalan(hour, minute)}
+                    </p>
+                    <button 
+                      onClick={handlePlayAudio} 
+                      className="p-2 rounded-full bg-sky-200 text-sky-700 hover:bg-sky-300 transition"
+                      aria-label="Reproduir pronunciació"
+                    >
+                      <SpeakerIcon />
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -1502,7 +1556,7 @@
                       >
                         Següent
                       </button>
-                      {feedback === 'incorrect' && !geminiExplanation && !isExplanationLoading && API_KEY && (
+                      {feedback === 'incorrect' && !geminiExplanation && !isExplanationLoading && (
                         <button onClick={fetchExplanation} className="text-sm text-sky-700 hover:underline font-semibold whitespace-nowrap">
                           Explica-m'ho
                         </button>
@@ -1518,10 +1572,13 @@
       // --- from App.tsx ---
       const App = () => {
         const [currentView, setCurrentView] = useState(View.Explain);
-
+        
         return (
           <div className="bg-slate-100 min-h-screen text-slate-800">
-            <Header currentView={currentView} setCurrentView={setCurrentView} />
+            <Header 
+              currentView={currentView} 
+              setCurrentView={setCurrentView}
+            />
             <main className="container mx-auto p-4 md:p-8">
               {currentView === View.Explain && <ExplainView />}
               {currentView === View.Learn && <LearnView />}
